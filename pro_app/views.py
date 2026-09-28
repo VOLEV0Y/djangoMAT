@@ -36,11 +36,28 @@ class CategoryView(View):
                 {'status': 'error', 'code': 400},
                 status=400
                 )
-
+        
+@method_decorator(csrf_exempt, 'dispatch')
 class Get_Categorie(View):
     def get(self, request, id):
         categories = Category.objects.values('id', 'name').get(id=id)
         return JsonResponse(categories)
+
+    def put(self, request, id):
+        category_instance = get_object_or_404(Category, id=id)
+        dict_from_request = loads(request.body)
+        form = CategoryForm(dict_from_request, instance=category_instance)
+        if form.is_valid():
+            quote = form.save()
+            return JsonResponse(
+                {'status': 'success',
+                'message': 'Changed!',
+                'id': quote.id}, status=201
+            )
+        else:
+            return JsonResponse(
+                {'status': 'error', 'code': 400}, status=400
+            )
 
 
 @method_decorator(csrf_exempt, 'dispatch')
@@ -51,6 +68,22 @@ class Post_Expense(View):
             'data': expenses
         }
         return JsonResponse(obj)
+
+    def put(self, request, id):
+        Post_Expense_instance = get_object_or_404(Post_Expense, id=id)
+        dict_from_request = loads(request.body)
+        form = ExpenseForm(dict_from_request, instance=Post_Expense_instance)
+        if form.is_valid():
+            quote = form.save()
+            return JsonResponse(
+                {'status': 'success',
+                'message': 'Changed!',
+                'id': quote.id}, status=201
+            )
+        else:
+            return JsonResponse(
+                {'status': 'error', 'code': 400}, status=400
+            )
 
     def post(self, request):
         raw_json = request.body
@@ -69,12 +102,36 @@ class Post_Expense(View):
                 {'status': 'error', 'code': 400},
                 status=400
                 )
+        
+@method_decorator(csrf_exempt, 'dispatch')
+class Get_Expense(View):
+    def get(self, request, id):
+        expense = Expense.objects.values(
+            'id', 'category_id', 'amount', 'date'
+        ).get(id=id)
+        return JsonResponse(expense)
 
 @method_decorator(csrf_exempt, 'dispatch')
 class Post_ExpenseTag(View):
     def get(self, request, id):
         tag = ExpenseTag.objects.values('id', 'expense_id', 'tag_name').get(id=id)
         return JsonResponse(tag)
+
+    def put(self, request, id):
+        category_instance = get_object_or_404(ExpenseTag, id=id)
+        dict_from_request = loads(request.body)
+        form = ExpenseTagForm(dict_from_request, instance=category_instance)
+        if form.is_valid():
+            quote = form.save()
+            return JsonResponse(
+                {'status': 'success',
+                'message': 'Changed!',
+                'id': quote.id}, status=201
+            )
+        else:
+            return JsonResponse(
+                {'status': 'error', 'code': 400}, status=400
+            )
 
     def post(self, request):
         raw_json = request.body
